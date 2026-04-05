@@ -1,0 +1,36 @@
+#cfcoach-profile-tab {
+  color: #2d89ab !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+#cfcoach-profile-tab.cfcoach-current {
+  color: #d70f0f !important;
+}
+
+#cfcoach-panel-wrap {
+  margin-top: 10px;
+  display: none;
+}
+
+#cfcoach-panel-wrap.cfcoach-open {
+  display: block;
+}
+
+#cfcoach-frame {
+  width: 100%;
+  height: 82vh;
+  min-height: 620px;
+  border: 0;
+  border-radius: 3px;
+  background: #f8f8f8;
+  border: 1px solid #cfcfcf;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  #cfcoach-frame {
+    height: 84vh;
+    min-height: 520px;
+  }
+}

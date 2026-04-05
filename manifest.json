@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "CFCoach",
+  "version": "0.1.0",
+  "description": "CFCoach brings Profile Analysis, Daily Mix, and Contest Generator directly to Codeforces.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://codeforces.com/*",
+    "*://*.codeforces.com/*",
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ],
+  "action": {
+    "default_title": "CFCoach"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://codeforces.com/*", "*://*.codeforces.com/*"],
+      "js": ["contentScript.js"],
+      "css": ["contentScript.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["overlay.html", "overlay.css", "overlay.js"],
+      "matches": ["*://codeforces.com/*", "*://*.codeforces.com/*"]
+    }
+  ]
+}
