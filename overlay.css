@@ -32,6 +32,37 @@ body {
   padding: 10px 12px;
 }
 
+.top-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #3b5998;
+  box-shadow: 0 0 0 2px rgba(59, 89, 152, 0.15);
+}
+
+.top-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.kpi-pill {
+  border: 1px solid #c7d7ee;
+  background: #f1f6fe;
+  color: #284366;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .top h1 {
   margin: 0;
   font-size: 22px;
@@ -44,13 +75,6 @@ body {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 12px;
-}
-
-.handle-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px;
-  margin-top: 10px;
 }
 
 input,
@@ -101,6 +125,7 @@ select:focus {
   border: 1px solid var(--line);
   background: var(--surface);
   border-radius: 3px;
+  overflow-x: auto;
 }
 
 .tab {
@@ -112,6 +137,7 @@ select:focus {
   font-weight: 700;
   text-transform: uppercase;
   padding: 0;
+  white-space: nowrap;
 }
 
 .tab:hover {
@@ -139,6 +165,7 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
@@ -146,6 +173,16 @@ select:focus {
   margin: 0;
   font-size: 14px;
   color: #3b5998;
+}
+
+.pane-chip {
+  border: 1px solid #cfd9e8;
+  background: #f6f8fc;
+  color: #4f607c;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .daily-toolbar {
@@ -201,6 +238,26 @@ select:focus {
   color: #2f477c;
 }
 
+.explain-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.explain-card {
+  border: 1px solid #d5deec;
+  background: #f8fbff;
+  border-radius: 2px;
+  padding: 8px;
+}
+
+.explain-card h3 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #2f477c;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -238,6 +295,54 @@ select:focus {
   background: #fff;
   border-radius: 2px;
   padding: 8px;
+}
+
+.contest-problem-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.contest-problem-rating {
+  border: 1px solid #cfd9e8;
+  background: #f6f8fc;
+  color: #2f477c;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.problem-tags-wrap {
+  margin-top: 7px;
+}
+
+.reveal-tags-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.problem-tags {
+  margin-top: 6px;
+}
+
+.problem-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.problem-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cfd9e8;
+  background: #f6f8fc;
+  color: #2f477c;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 11px;
 }
 
 .setup-flow {
@@ -385,4 +490,16 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+  .pane-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .explain-grid,
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
 }

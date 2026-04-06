@@ -9,9 +9,17 @@
   <body>
     <div class="app">
       <header class="top">
-        <div>
-          <h1>CFCoach</h1>
-          <p>Companion for smarter Codeforces practice</p>
+        <div class="top-brand">
+          <div class="brand-dot" aria-hidden="true"></div>
+          <div>
+            <h1>CFCoach</h1>
+            <p>Codeforces recommender and contest generator</p>
+          </div>
+        </div>
+        <div class="top-kpis">
+          <span class="kpi-pill">Profile Signals</span>
+          <span class="kpi-pill">Daily Mix</span>
+          <span class="kpi-pill">Group Contest</span>
         </div>
       </header>
 
@@ -25,6 +33,7 @@
         <section id="analysis" class="pane active">
           <div class="pane-head">
             <h2>Profile Analysis</h2>
+            <span class="pane-chip">Personalized strengths and gaps</span>
           </div>
           <div class="daily-toolbar">
             <button id="analysisRunBtn" class="btn" type="button">Analyze Profile</button>
@@ -33,23 +42,43 @@
             <strong>How CFCoach computes these percentages:</strong>
             Tag percentage is an estimated mastery score from your accepted rate, wrong attempts, and recency of submissions for that tag. Overall Strength is the weighted summary across unlocked tags, and Contest Ratio reflects how much real contest practice you do versus practice-only solving.
           </div>
+          <div class="explain-grid">
+            <div class="explain-card">
+              <h3>What the numbers represent</h3>
+              <ul class="list">
+                <li><strong>Rating:</strong> Current Codeforces rating from profile data.</li>
+                <li><strong>Overall Strength:</strong> Weighted mastery across unlocked tags.</li>
+                <li><strong>Contest Ratio:</strong> Balance of contest practice vs upsolving.</li>
+                <li><strong>Practiced Topics:</strong> Number of tags with enough history.</li>
+              </ul>
+            </div>
+            <div class="explain-card">
+              <h3>How to use this tab</h3>
+              <ul class="list">
+                <li>Start with Top Focus Areas to pick weak links for this week.</li>
+                <li>Use Pattern Insights to avoid repeating similar mistakes.</li>
+              </ul>
+            </div>
+          </div>
           <div id="analysisContent" class="content-box">Enter a handle and click Analyze.</div>
         </section>
 
         <section id="daily" class="pane">
           <div class="pane-head">
             <h2>Daily Mix</h2>
+            <span class="pane-chip">Adaptive daily practice batches</span>
           </div>
           <div class="guide-box">
             <strong>How Daily Mix is generated:</strong>
             Daily Mix gives 4 batches per day, with 6 problems in each batch. Batches 1 and 2 are weak-topic focused, while batches 3 and 4 are random general-practice to preserve topic breadth. We never suggest already solved problems and avoid same-day repeats.
           </div>
+          
           <div class="daily-toolbar">
             <button id="dailyRunBtn" class="btn" type="button">Get Daily Mix</button>
             <button id="dailyMoreBtn" class="btn secondary" type="button">Get More Problems</button>
             <span id="dailyMeta" class="muted-inline"></span>
           </div>
-          <div id="dailyContent" class="content-box">Enter a handle and click Analyze.</div>
+          <div id="dailyContent" class="content-box">Click Get Daily Mix to start.</div>
 
           <div class="daily-tag-panel">
             <h3>Tag-wise Practice</h3>
@@ -66,10 +95,19 @@
         <section id="contest" class="pane">
           <div class="pane-head">
             <h2>Contest Generator</h2>
+            <span class="pane-chip">Balanced mashup for a group</span>
           </div>
           <div class="guide-box">
             <strong>How Contest Generator works:</strong>
             This feature analyzes all handles you enter, combines their skill profiles, and suggests a balanced contest set that is fair for the whole group. Random Balanced mode mixes topic and difficulty coverage, while Tag Filtered mode restricts by selected tags. You must create the mashup contest yourself on Codeforces and add the suggested problems shown here.
+          </div>
+          <div class="explain-card">
+            <h3>Mode meanings</h3>
+            <ul class="list">
+              <li><strong>Random Balanced:</strong> Multi-topic set with spread difficulty.</li>
+              <li><strong>Tag Filtered:</strong> Restrict generation to selected tags only.</li>
+              <li><strong>Problem Count:</strong> Final size of suggested mashup set.</li>
+            </ul>
           </div>
 
           <div class="form-grid">

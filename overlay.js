@@ -1,4 +1,4 @@
-const API_BASE = window.CFCOACH_CONFIG?.API_BASE || "http://127.0.0.1:8000";
+const API_BASE = window.CFCOACH_CONFIG?.API_BASE;
 const HANDLE_KEY = "cfcoach_handle";
 
 const tabs = document.querySelectorAll(".tab");
@@ -29,6 +29,7 @@ let dailyMixState = null;
 let dailyTagState = null;
 let dailySelectedTags = new Set();
 let profileHandle = "";
+let problemTagsCounter = 0;
 
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -79,8 +80,137 @@ function renderTagSection(title, tags, allTagMap, className) {
   return `<h3>${title}</h3><div class="tag-grid">${cards}</div>`;
 }
 
+function formatBatchLabel(slot) {
+  const value = String(slot || "").toLowerCase();
+  if (["warmup", "targeted", "target", "weak", "focused"].some((key) => value.includes(key))) {
+    return "Focused Batch";
+  }
+  if (["general", "random", "mix", "stretch"].some((key) => value.includes(key))) {
+    return "General Batch";
+  }
+  return "General Batch";
+}
+
+function formatDailyMixBatchLabel(index) {
+  const batchSize = 6;
+  const batchNo = Math.floor(index / batchSize) + 1;
+  return batchNo <= 2 ? "Focused Batch" : "General Batch";
+}
+
+function extractProblemTags(problem) {
+  const merged = [];
+  const candidates = [problem?.tags, problem?.tag_list, problem?.topic_tags, problem?.topics];
+
+  candidates.forEach((value) => {
+    if (Array.isArray(value)) {
+      value.forEach((tag) => {
+        const cleaned = String(tag || "").trim();
+        if (cleaned) {
+          merged.push(cleaned);
+        }
+      });
+    }
+  });
+
+  if (!merged.length && problem?.tag) {
+    const single = String(problem.tag).trim();
+    if (single) {
+      merged.push(single);
+    }
+  }
+
+  return [...new Set(merged)];
+}
+
+function renderRevealTagsBlock(problem) {
+  const tags = extractProblemTags(problem);
+  const panelId = `problem-tags-${++problemTagsCounter}`;
+  const tagsHtml = tags.length
+    ? `<div class="problem-tags-list">${tags.map((tag) => `<span class="problem-tag-chip">${escapeHtml(tag)}</span>`).join("")}</div>`
+    : `<span class="muted-inline">No tags available for this problem.</span>`;
+
+  return `<div class="problem-tags-wrap">
+      <button type="button" class="btn secondary reveal-tags-btn" data-target="${panelId}">Reveal Tags</button>
+      <div id="${panelId}" class="problem-tags hidden">${tagsHtml}</div>
+    </div>`;
+}
+
+function bindRevealTagButtons(root = document) {
+  root.querySelectorAll(".reveal-tags-btn").forEach((btn) => {
+    if (btn.dataset.bound === "1") {
+      return;
+    }
+
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const targetId = btn.getAttribute("data-target");
+      const panel = targetId ? document.getElementById(targetId) : null;
+      if (!panel) {
+        return;
+      }
+
+      panel.classList.toggle("hidden");
+      btn.textContent = panel.classList.contains("hidden") ? "Reveal Tags" : "Hide Tags";
+    });
+  });
+}
+
+function bindContestRatingToggle(root = document) {
+  const btn = root.querySelector("#contestRevealRatingsBtn");
+  if (!btn || btn.dataset.bound === "1") {
+    return;
+  }
+
+  btn.dataset.bound = "1";
+  btn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const ratings = root.querySelectorAll(".contest-problem-rating");
+    if (!ratings.length) {
+      return;
+    }
+
+    const shouldShow = [...ratings].some((el) => el.classList.contains("hidden"));
+    ratings.forEach((el) => el.classList.toggle("hidden", !shouldShow));
+    btn.textContent = shouldShow ? "Hide Ratings" : "Reveal Ratings";
+  });
+}
+
+function getFriendlyErrorText(err) {
+  const raw = String(err?.message || err || "").trim();
+  if (!raw) {
+    return "Something went wrong. Please try again.";
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed?.detail === "string" && parsed.detail.trim()) {
+      return parsed.detail.trim();
+    }
+    if (Array.isArray(parsed?.detail) && parsed.detail.length) {
+      return parsed.detail.map((x) => (typeof x === "string" ? x : x?.msg || "")).filter(Boolean).join("; ") || "Something went wrong. Please try again.";
+    }
+    if (typeof parsed?.message === "string" && parsed.message.trim()) {
+      return parsed.message.trim();
+    }
+  } catch {
+    // Not JSON, continue with raw text.
+  }
+
+  return raw.replace(/^Failed:\s*/i, "");
+}
+
+function getApiBase() {
+  if (!API_BASE) {
+    throw new Error("Backend URL is not configured. Set window.CFCOACH_CONFIG.API_BASE in overlay.config.js");
+  }
+  return API_BASE.replace(/\/+$/, "");
+}
+
 async function apiGet(path) {
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetch(`${getApiBase()}${path}`);
   if (!res.ok) {
     const err = await res.text();
     throw new Error(err || `Request failed: ${res.status}`);
@@ -89,7 +219,7 @@ async function apiGet(path) {
 }
 
 async function apiPost(path, payload) {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${getApiBase()}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -173,6 +303,7 @@ async function runProfileAnalysis() {
          <div class=\"metric\"><span>Contest Ratio</span><strong>${summary.contest_ratio || 0}%</strong></div>
          <div class=\"metric\"><span>Practiced Topics</span><strong>${Object.keys(skill.tags || {}).length}</strong></div>
        </div>
+       <div class="guide-box"><strong>Skill Tree Legend:</strong> Strong (green), Moderate (blue), Weak (orange), Very Weak (red), Locked (gray). Use this order for revision priority.</div>
        <h3>Top Focus Areas</h3>
        ${weakHtml}
        <h3>Pattern Insights</h3>
@@ -181,7 +312,7 @@ async function runProfileAnalysis() {
        ${skillTreeHtml || "<div class=\"muted-inline\">No tag data available.</div>"}`
     );
   } catch (err) {
-    setContent(analysisContent, `Failed: ${err.message}`);
+    setContent(analysisContent, getFriendlyErrorText(err));
   }
 }
 
@@ -204,7 +335,7 @@ async function runDailyMix() {
     setContent(dailyTagContent, "No tag-based suggestions yet.");
     updateDailyTagMeta();
   } catch (err) {
-    setContent(dailyContent, `Failed: ${err.message}`);
+    setContent(dailyContent, getFriendlyErrorText(err));
     dailyMeta.textContent = "";
     dailyMoreBtn.disabled = true;
   }
@@ -226,17 +357,20 @@ function renderDailyMix() {
       <div class=\"metric\"><span>Total Problems</span><strong>${list.length}</strong></div>
       <div class=\"metric\"><span>Remaining Batches</span><strong>${data.remaining_batches ?? "-"}</strong></div>
     </div>
+    <div class="guide-box"><strong>Batch Meaning:</strong> Focused Batch emphasizes weaker areas, while General Batch maintains topic breadth and consistency.</div>
     <div class=\"problem-list\">${list
       .map(
-        (p) =>
+        (p, idx) =>
           `<div class=\"problem-item\">
-             <div><strong>${escapeHtml((p.slot || "target").toUpperCase())}</strong> • Rating ${p.rating ?? "-"}</div>
+             <div><strong>${escapeHtml(formatDailyMixBatchLabel(idx))}</strong> • Rating ${p.rating ?? "-"}</div>
              <a href=\"${escapeHtml(p.url || "#")}\" target=\"_blank\" rel=\"noreferrer\">${escapeHtml(`${p.contest_id}-${p.index} ${p.name}`)}</a>
+             ${renderRevealTagsBlock(p)}
            </div>`
       )
       .join("")}</div>`;
 
   setContent(dailyContent, html);
+  bindRevealTagButtons(dailyContent);
 
   const remaining = Number(data.remaining_batches ?? 0);
   dailyMeta.textContent = data.message || `Remaining batches today: ${remaining}`;
@@ -282,7 +416,7 @@ async function runDailyMixMore() {
     };
     renderDailyMix();
   } catch (err) {
-    dailyMeta.textContent = `Failed: ${err.message}`;
+    dailyMeta.textContent = getFriendlyErrorText(err);
     dailyMoreBtn.disabled = false;
     dailyMoreBtn.textContent = previousText;
   }
@@ -359,20 +493,22 @@ async function runDailyTagPractice() {
         .map(
           (p) =>
             `<div class=\"problem-item\">
-               <div><strong>${escapeHtml((p.slot || "target").toUpperCase())}</strong> • Rating ${p.rating ?? "-"}</div>
+               <div><strong>${escapeHtml(formatBatchLabel(p.slot))}</strong> • Rating ${p.rating ?? "-"}</div>
                <a href=\"${escapeHtml(p.url || "#")}\" target=\"_blank\" rel=\"noreferrer\">${escapeHtml(`${p.contest_id}-${p.index} ${p.name}`)}</a>
+               ${renderRevealTagsBlock(p)}
              </div>`
         )
         .join("")}</div>`;
       setContent(dailyTagContent, html);
+      bindRevealTagButtons(dailyTagContent);
       const selectedLabel = data.selected_tags?.length
         ? data.selected_tags.join(", ")
         : Array.from(dailySelectedTags).join(", ");
       updateDailyTagMeta(`Generated ${list.length} problems for: ${selectedLabel}`);
     }
   } catch (err) {
-    setContent(dailyTagContent, `Failed: ${err.message}`);
-    updateDailyTagMeta("Failed to fetch tag suggestions.");
+    setContent(dailyTagContent, getFriendlyErrorText(err));
+    updateDailyTagMeta(getFriendlyErrorText(err));
   } finally {
     dailyTagBtn.disabled = false;
     dailyTagBtn.textContent = prev;
@@ -427,6 +563,11 @@ async function runContestGenerator() {
     return;
   }
 
+  if (handles.length > 10) {
+    setContent(contestContent, "You can enter between 1 and 10 handles.");
+    return;
+  }
+
   const count = Number(problemCount.value || 5);
   if (count < 2 || count > 8) {
     setContent(contestContent, "Problem count must be between 2 and 8.");
@@ -465,10 +606,17 @@ async function runContestGenerator() {
         <div class=\"metric\"><span>Group Size</span><strong>${data.group_size || handles.length}</strong></div>
         <div class=\"metric\"><span>Problems</span><strong>${list.length}</strong></div>
       </div>
+      <div class="guide-box"><strong>Interpretation:</strong> Generated set balances member profiles. In Tag Filtered mode, only selected topics are considered; in Random Balanced mode, topic and difficulty spread are prioritized.</div>
+      <div class="contest-actions"><button id="contestRevealRatingsBtn" class="btn secondary" type="button">Reveal Ratings</button></div>
       <div class=\"problem-list\">${list
         .map(
           (p) =>
-            `<div class=\"problem-item\"><a href=\"${p.url}\" target=\"_blank\" rel=\"noreferrer\">${p.position} - ${p.contest_id}-${p.index} ${p.name}</a></div>`
+            `<div class=\"problem-item\">
+               <div class="contest-problem-head">
+                 <a href=\"${escapeHtml(p.url || "#")}\" target=\"_blank\" rel=\"noreferrer\">${escapeHtml(`${p.position} - ${p.contest_id}-${p.index} ${p.name}`)}</a>
+                 <span class="contest-problem-rating hidden">Rating ${escapeHtml(String(p.rating ?? "-"))}</span>
+               </div>
+             </div>`
         )
         .join("")}</div>
       ${
@@ -511,8 +659,10 @@ async function runContestGenerator() {
       }`;
 
     setContent(contestContent, html);
+    bindRevealTagButtons(contestContent);
+    bindContestRatingToggle(contestContent);
   } catch (err) {
-    setContent(contestContent, `Failed: ${err.message}`);
+    setContent(contestContent, getFriendlyErrorText(err));
   }
 }
 
