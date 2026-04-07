@@ -30,19 +30,3 @@ Click **Add to Chrome** and confirm installation.
 Privacy policy:
 
 https://tushal-mendpara.github.io/CFCoach-Extension/privacy-policy.html
-
-## Local Development (Optional)
-
-If you want to run or test this repository locally:
-
-1. Clone/download this repo.
-2. Open `chrome://extensions`.
-3. Enable **Developer mode**.
-4. Click **Load unpacked**.
-5. Select this project folder.
-
-### Backend API Base URL
-
-To change the backend endpoint for local testing, edit `overlay.config.js`:
-
-`window.CFCOACH_CONFIG.API_BASE = "https://your-backend-domain.com"`
