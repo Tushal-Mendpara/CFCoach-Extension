@@ -1,37 +1,48 @@
-# CFCoach Chrome Extension (Standalone)
+# CFCoach Chrome Extension
 
-This is a separate extension project and does not modify your existing CFCoach web app.
+CFCoach is a Chrome extension for Codeforces users that helps you practice smarter with profile-based recommendations and generated practice sets.
 
-## Features
+It adds a `CFCOACH` tab directly on Codeforces profile pages and opens an in-page panel with:
 
-- Injects a CFCoach tab on Codeforces profile pages.
-- Opens an in-page panel with tabs:
-  - Profile Analysis
-  - Daily Mix
-  - Contest Generator
-- Uses your backend APIs through a configurable base URL.
+- Profile Analysis
+- Daily Mix
+- Contest Generator
 
-## Change Deploy Link (Single Place)
+## Install From Chrome Web Store
 
-Update only this file before publishing:
+Use the public listing:
 
-- `overlay.config.js`
+https://chromewebstore.google.com/detail/ackkplclopoecipnfllalmencpbnonoo?utm_source=item-share-cb
 
-Set:
+Click **Add to Chrome** and confirm installation.
 
-- `window.CFCOACH_CONFIG.API_BASE = "https://your-backend-domain.com"`
+## How To Use
 
-No other extension files need URL changes.
+1. Open any Codeforces profile page (for example: `https://codeforces.com/profile/tourist`).
+2. Click the **CFCOACH** tab injected on the page.
+3. Use the panel features:
+   - **Profile Analysis**: View strengths, weak areas, and performance patterns.
+   - **Daily Mix**: Get a ready-to-practice problem set for daily consistency.
+   - **Contest Generator**: Build balanced mashup-style sets for solo or group practice.
 
-## Load In Chrome (Developer Mode)
+## Privacy
 
-1. Open `chrome://extensions`.
-2. Enable `Developer mode`.
-3. Click `Load unpacked`.
-4. Select the `CFCoach` folder.
-5. Open a Codeforces profile page and click the `CFCOACH` tab.
+Privacy policy:
 
-## Notes
+https://tushal-mendpara.github.io/CFCoach-Extension/privacy-policy.html
 
-- Handle is stored in `chrome.storage.local`.
-- This is an MVP scaffold you can iterate on for production release.
+## Local Development (Optional)
+
+If you want to run or test this repository locally:
+
+1. Clone/download this repo.
+2. Open `chrome://extensions`.
+3. Enable **Developer mode**.
+4. Click **Load unpacked**.
+5. Select this project folder.
+
+### Backend API Base URL
+
+To change the backend endpoint for local testing, edit `overlay.config.js`:
+
+`window.CFCOACH_CONFIG.API_BASE = "https://your-backend-domain.com"`
